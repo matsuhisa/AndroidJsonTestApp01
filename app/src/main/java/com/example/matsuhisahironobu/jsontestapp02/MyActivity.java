@@ -1,10 +1,16 @@
 package com.example.matsuhisahironobu.jsontestapp02;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -15,9 +21,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MyActivity extends Activity {
 
-     public static final String URL = "http://agile-basin-1356.herokuapp.com/entries.json";
+    public static final String URL = "http://agile-basin-1356.herokuapp.com/entries.json";
+    public static List<String> items = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +47,7 @@ public class MyActivity extends Activity {
             public void onPostExecute(String result) {
                 Log.v("onPostExecute", result);
 
+
                 try{
                     JSONObject jsonObject = new JSONObject(result);
                     JSONArray  jsonArray  = jsonObject.getJSONArray("data");
@@ -45,10 +56,18 @@ public class MyActivity extends Activity {
                     {
                         JSONObject dataObject = jsonArray.getJSONObject(i);
                         Log.v("Data -> ", dataObject.getString("title"));
+                        //items[i] = dataObject.getString("title");
+                        items.add(dataObject.getString("title"));
                     }
+
+                    //ArrayAdapter<String> adapter = new ArrayAdapter<String>(thisview, R.layout.list_item, items);
+                    setListView(items);
+
                 }catch (JSONException e){
                     Log.v("JsonError", e.getMessage());
                 }
+
+
             }
 
             @Override
@@ -63,19 +82,37 @@ public class MyActivity extends Activity {
         });
         asyncGet.execute(URL);
 
-        /*
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpGet request = new HttpGet(URL);
-        HttpResponse httpResponse;
-        try {
-            httpResponse = httpClient.execute(request);
-            Log.v("Response", URL);
-        }catch (Exception e){
-            Log.v("Error", e.getMessage());
-        }
-        */
+
 
         Log.v("End", "-------------");
+    }
+
+
+    public void setListView(List items)
+    {
+        Log.v("setListView", "-------------");
+
+        // 空のテスト用
+        //items = new ArrayList<String>() {};
+
+        // ListView
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, items);
+
+        //
+        final ListView myListView = (ListView) findViewById(R.id.myListView);
+
+        myListView.setEmptyView(findViewById(R.id.empty));
+        myListView.setAdapter(adapter);
+
+        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView tv = (TextView) view;
+                tv.setText("Clicked");
+            }
+        });
+
+        Log.v("setListView", "-------------");
     }
 
 
